@@ -8,7 +8,7 @@ export type Priority = "low" | "medium" | "high";
 export default function AddReminder() {
   const router = useRouter();
 
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState<string>("");
   const [priority, setPriority] = useState<Priority>("low");
 
   const handleSave = () => {
