@@ -1,7 +1,8 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { theme } from "../theme";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 export type Priority = "low" | "medium" | "high";
 
@@ -9,11 +10,25 @@ export default function AddReminder() {
   const router = useRouter();
 
   const [title, setTitle] = useState<string>("");
+  const [date, setDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
   const [priority, setPriority] = useState<Priority>("low");
+
+  const handleDateConfirm = (selectedDate: Date) => {
+    setDate(selectedDate);
+    setShowDatePicker(false);
+  };
+
+  const handleTimeConfirm = (selectedTime: Date) => {
+    setDate(selectedTime);
+    setShowTimePicker(false);
+  };
 
   const handleSave = () => {
     if (!title) {
-      console.error("Please add reminder title!");
+      Alert.alert("Validation Error", "Please provide a title for the reminder.");
+      return;
     } else {
       console.log({ title, priority });
       router.back();
@@ -33,6 +48,31 @@ export default function AddReminder() {
         value={title}
         onChangeText={setTitle}
       />
+      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.buttonDatePicker}>
+        <Text style={styles.leftAlignedText}>Select Date: {date.toLocaleDateString()}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.buttonTimePicker}>
+        <Text style={styles.leftAlignedText}>
+          Select Time: {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </Text>
+      </TouchableOpacity>
+
+      <DateTimePickerModal
+        isVisible={showDatePicker}
+        mode="date"
+        textColor="black"
+        onConfirm={handleDateConfirm}
+        onCancel={() => setShowDatePicker(false)}
+      />
+
+      <DateTimePickerModal
+        isVisible={showTimePicker}
+        mode="time"
+        textColor="black"
+        onConfirm={handleTimeConfirm}
+        onCancel={() => setShowTimePicker(false)}
+      />
+
       <View style={styles.radioGroup}>
         <Text style={styles.radioLabel}>Priority</Text>
         {["low", "medium", "high"].map((level) => (
@@ -66,17 +106,23 @@ export default function AddReminder() {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: theme.colors.white,
+    backgroundColor: theme.colors.white100,
     flex: 1,
     justifyContent: "center",
     padding: 20,
   },
+  leftAlignedText: {},
+  buttonDatePicker: {
+    alignItems: "flex-start",
+    backgroundColor: theme.colors.white90
+  },
+  buttonTimePicker: {},
   buttonGreen: { backgroundColor: theme.colors.green100 },
-  buttonRed: { backgroundColor: theme.colors.yellow100 },
-  buttonYellow: { backgroundColor: theme.colors.red100 },
+  buttonRed: { backgroundColor: theme.colors.red100 },
+  buttonYellow: { backgroundColor: theme.colors.yellow100 },
   buttonSelectedPriority: { borderColor: theme.colors.black90, borderWidth: 2 },
   buttonText: {
-    color: theme.colors.white,
+    color: theme.colors.white100,
     textTransform: "uppercase",
   },
   closeButton: {
@@ -110,7 +156,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   radioText: {
-    color: theme.colors.white,
+    color: theme.colors.white100,
     fontSize: 16,
   },
   saveButton: {

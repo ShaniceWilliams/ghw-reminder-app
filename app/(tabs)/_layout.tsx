@@ -1,7 +1,8 @@
-import { Tabs, useRouter } from "expo-router";
+import { Link, Tabs, useRouter } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 import { theme } from "../../theme";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
+import React from "react";
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -17,13 +18,16 @@ export default function TabsLayout() {
           title: "Reminders",
           tabBarIcon: ({ color }) => <Feather name="list" size={24} color={color} />,
           headerRight: () => (
-            <Feather
-              name="plus-circle"
-              size={24}
-              color={theme.colors.green100}
-              style={style.addReminders}
-              onPress={() => router.push("addReminder")}
-            />
+            <Link href="/addReminder" asChild>
+              <Pressable hitSlop={20}>
+                <Feather
+                  name="plus-circle"
+                  size={24}
+                  color={theme.colors.green100}
+                  style={style.addReminders}
+                />
+              </Pressable>
+            </Link>
           ),
         }}
       />

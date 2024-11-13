@@ -44,13 +44,14 @@ const styles = StyleSheet.create({
   textContainer: {
     alignItems: "flex-start",
     flexDirection: "column",
+    paddingRight: 10,
   },
   iconContainer: {
     alignItems: "center",
     borderRadius: 20,
     height: 40,
     justifyContent: "center",
-    marginRight: 10,
+    marginRight: 5,
     width: 40,
   },
   number: {
