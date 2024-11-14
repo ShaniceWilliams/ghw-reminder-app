@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: theme.colors.white,
+    backgroundColor: theme.colors.white95,
     flex: 1,
     justifyContent: "center",
   },
