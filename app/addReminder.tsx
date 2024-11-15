@@ -6,6 +6,15 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 export type Priority = "low" | "medium" | "high";
 
+export type Reminder = {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  priority: Priority;
+  completed?: boolean;
+};
+
 export default function AddReminder() {
   const router = useRouter();
 
@@ -16,23 +25,49 @@ export default function AddReminder() {
   const [priority, setPriority] = useState<Priority>("low");
 
   const handleDateConfirm = (selectedDate: Date) => {
-    setDate(selectedDate);
+    // setDate(selectedDate);
+    // setShowDatePicker(false);
+    const updatedDate = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      date.getHours(),
+      date.getMinutes()
+    );
+    setDate(updatedDate);
     setShowDatePicker(false);
   };
 
   const handleTimeConfirm = (selectedTime: Date) => {
-    setDate(selectedTime);
+    // setDate(selectedTime);
+    // setShowTimePicker(false);
+    const updatedDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      selectedTime.getHours(),
+      selectedTime.getMinutes()
+    );
+    setDate(updatedDate);
     setShowTimePicker(false);
   };
-
+  // TODO: Update handleSave to save data to local storage
   const handleSave = () => {
     if (!title) {
       Alert.alert("Validation Error", "Please provide a title for the reminder.");
       return;
-    } else {
-      console.log({ title, priority });
-      router.back();
     }
+
+    const newReminder: Reminder = {
+      id: Date.now().toString(),
+      title,
+      date: date.toISOString().split("T")[0],
+      time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      priority,
+      completed: false,
+    };
+
+    console.log(newReminder);
   };
   const handleClose = () => {
     console.log("Closed.");
@@ -119,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     backgroundColor: theme.colors.white95,
     borderRadius: 10,
-    marginBottom: 20,
+    marginVertical: 10,
     padding: 10,
     width: "100%",
   },
@@ -127,7 +162,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     backgroundColor: theme.colors.white95,
     borderRadius: 10,
-    marginBottom: 20,
+    marginVertical: 10,
     padding: 10,
     width: "100%",
   },
