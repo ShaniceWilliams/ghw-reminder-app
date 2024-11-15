@@ -2,7 +2,7 @@ import React from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { theme } from "../theme";
 import { format, parseISO } from "date-fns";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 
 export type Priority = "low" | "medium" | "high";
 
@@ -28,52 +28,54 @@ const RemindersList: React.FC<RemindersListProps> = ({ reminders, onComplete, on
         data={reminders}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          <View style={styles.listParent}>
-            <Text style={styles.reminderTitle}>{item.title}</Text>
-            <View style={styles.listChild}>
-              <Text>
-                {format(parseISO(item.date), "MMM, dd, yyyy")} | {item.time}
-              </Text>
-              <View style={styles.flexSpacer} />
-              <View style={styles.actionIcons}>
-                <Feather
-                  name={
-                    item.priority === "low"
-                      ? "alert-circle"
-                      : item.priority === "medium"
-                        ? "alert-triangle"
-                        : "alert-octagon"
-                  }
-                  size={24}
-                  color={
-                    item.priority == "low"
-                      ? theme.colors.green101
-                      : item.priority === "medium"
-                        ? theme.colors.yellow101
-                        : theme.colors.red101
-                  }
-                />
+          return (
+            <View style={styles.listParent}>
+              <Text style={styles.reminderTitle}>{item.title}</Text>
+              <View style={styles.listChild}>
+                <Text>
+                  {format(parseISO(item.date), "MMM, dd, yyyy")} | {item.time}
+                </Text>
                 <View style={styles.flexSpacer} />
-                <TouchableOpacity
-                  onPress={() => {
-                    if (onComplete && !item.completed) {
-                      onComplete(item.id);
-                    }
-                  }}
-                >
+                <View style={styles.actionIcons}>
                   <Feather
-                    name={item.completed ? "check" : "circle"}
+                    name={
+                      item.priority === "low"
+                        ? "alert-circle"
+                        : item.priority === "medium"
+                          ? "alert-triangle"
+                          : "alert-octagon"
+                    }
                     size={24}
-                    color={item.completed ? theme.colors.green101 : theme.colors.black60}
+                    color={
+                      item.priority == "low"
+                        ? theme.colors.green101
+                        : item.priority === "medium"
+                          ? theme.colors.yellow101
+                          : theme.colors.red101
+                    }
                   />
-                </TouchableOpacity>
-                <View style={styles.flexSpacer} />
-                <TouchableOpacity onPress={() => onDelete?.(item.id)}>
-                  <Feather name={"trash-2"} size={24} color={theme.colors.red101} />
-                </TouchableOpacity>
+                  <View style={styles.flexSpacer} />
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (onComplete && !item.completed) {
+                        onComplete(item.id);
+                      }
+                    }}
+                  >
+                    <Feather
+                      name={item.completed ? "check" : "circle"}
+                      size={24}
+                      color={item.completed ? theme.colors.green101 : theme.colors.black60}
+                    />
+                  </TouchableOpacity>
+                  <View style={styles.flexSpacer} />
+                  <TouchableOpacity onPress={() => onDelete?.(item.id)}>
+                    <Feather name={"trash-2"} size={24} color={theme.colors.red101} />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>;
+          );
         }}
       />
     </View>

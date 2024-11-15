@@ -1,19 +1,138 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../theme";
-import { REMINDER_CARD_DATA } from "../../constants/data";
 import ReminderCard from "../../components/reminderCard";
+import { useCallback, useState } from "react";
+import RemindersList, { ReminderProps } from "../../components/reminderList";
+import { useFocusEffect } from "expo-router";
+import { fetchReminders, saveReminders } from "../../utils/storageHelper";
 
 export default function App() {
+  const [reminders, setReminders] = useState<ReminderProps[]>([]);
+  const [expandedPriority, setExpandedPriority] = useState<
+    "low" | "medium" | "high" | "today" | null
+  >(null);
+
+  const todaysDate = new Date().toISOString().split("T")[0];
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadReminders = async () => {
+        const storedReminders = await fetchReminders();
+        setReminders(storedReminders.filter((reminder) => !reminder.completed));
+      };
+      loadReminders();
+    }, []),
+  );
+
+  const handleCardPress = (priority: "low" | "medium" | "high" | "today") => {
+    setExpandedPriority(expandedPriority === priority ? null : priority);
+  };
+
+  const filteredReminders = reminders.filter((reminder) =>
+    expandedPriority === "today"
+      ? reminder.date === todaysDate
+      : reminder.priority === expandedPriority,
+  );
+
+  const handleComplete = (id: string) => {
+    Alert.alert(
+      "Mark as Completed",
+      "Do you want to mark this reminder as completed?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            const updatedReminders = reminders.map((reminder) =>
+              reminder.id === id ? { ...reminder, completed: true } : reminder,
+            );
+            setReminders(updatedReminders.filter((reminder) => !reminder.completed));
+            await saveReminders(
+              await fetchReminders().then((allReminders) =>
+                allReminders.map((reminder) =>
+                  reminder.id === id ? { ...reminder, completed: true } : reminder,
+                ),
+              ),
+            );
+          },
+        },
+      ],
+      { cancelable: false },
+    );
+  };
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Delete Reminder",
+      "Are you sure you want to delete this reminder?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const updatedReminders = reminders.filter((reminder) => reminder.id !== id);
+            setReminders(updatedReminders);
+            const allReminders = await fetchReminders();
+            const newAllReminders = allReminders.filter((reminder) => reminder.id !== id);
+            await saveReminders(newAllReminders);
+          },
+        },
+      ],
+      { cancelable: false },
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.headlineText}>Reminder App</Text>
+      <Text style={styles.headlineText}>All Reminders</Text>
       <View style={styles.cardContainer}>
-        {REMINDER_CARD_DATA.map((cardData) => (
-          <ReminderCard key={cardData.cardTitle} {...cardData} />
+        <ReminderCard
+          id="today"
+          cardTitle="Today"
+          icon="calendar"
+          iconBackgroundColor={theme.colors.blue100}
+          numberOfReminders={reminders.filter((r) => r.date === todaysDate).length}
+          onPress={() => handleCardPress("today")}
+        />
+        {["low", "medium", "high"].map((priority) => (
+          <ReminderCard
+            id={priority}
+            key={priority}
+            onPress={() => handleCardPress(priority as "low" | "medium" | "high")}
+            cardTitle={`${priority.charAt(0).toUpperCase() + priority.slice(1)} Priority`}
+            icon={
+              priority === "low"
+                ? "alert-circle"
+                : priority === "medium"
+                  ? "alert-triangle"
+                  : "alert-octagon"
+            }
+            iconBackgroundColor={
+              priority === "low"
+                ? theme.colors.green101
+                : priority === "medium"
+                  ? theme.colors.yellow101
+                  : theme.colors.red101
+            }
+            numberOfReminders={reminders.filter((r) => r.priority === priority).length}
+          />
         ))}
       </View>
-      <StatusBar style="auto" />
+      {expandedPriority && (
+        <RemindersList
+          reminders={filteredReminders}
+          onComplete={handleComplete}
+          onDelete={handleDelete}
+        />
+      )}
     </View>
   );
 }
@@ -34,7 +153,6 @@ const styles = StyleSheet.create({
   headlineText: {
     fontSize: 24,
     fontWeight: "bold",
-    margin: 10
-  }
+    margin: 10,
+  },
 });
-
